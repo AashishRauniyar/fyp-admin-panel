@@ -65,6 +65,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import RegisterUserDialog from '@/components/userComponents/RegisteruserDialogue';
 
 const UsersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -313,8 +314,13 @@ const UsersPage = () => {
       <div className="space-y-6 p-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold tracking-tight">Users Management</h1>
+          <RegisterUserDialog onSuccess={fetchUsers} />
           
         </div>
+
+        {/* <div className="flex justify-between items-center">
+      <h1 className="text-2xl font-bold tracking-tight">Users Management</h1>
+    </div> */}
 
         <Card>
           <CardHeader className="pb-3">

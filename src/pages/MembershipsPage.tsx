@@ -62,13 +62,26 @@ export const PlanType = {
 };
 
 // Form validation schema
+// const membershipFormSchema = z.object({
+//   user_id: z.string().min(1, "User is required"),
+//   plan_id: z.string().min(1, "Plan is required"),
+//   start_date: z.string().min(1, "Start date is required"),
+//   end_date: z.string().min(1, "End date is required"),
+//   status: z.string().min(1, "Status is required")
+// });
+
+
 const membershipFormSchema = z.object({
   user_id: z.string().min(1, "User is required"),
   plan_id: z.string().min(1, "Plan is required"),
   start_date: z.string().min(1, "Start date is required"),
   end_date: z.string().min(1, "End date is required"),
-  status: z.string().min(1, "Status is required")
+  status: z.string().min(1, "Status is required"),
+  payment_method: z.string().min(1, "Payment method is required")
 });
+
+// Then update the form's defaultValues to include payment_method:
+
 
 const MembershipsPage = () => {
   const { toast } = useToast();
@@ -110,17 +123,30 @@ const MembershipsPage = () => {
     onConfirm: null
   });
 
-  // Form setup
   const form = useForm({
     resolver: zodResolver(membershipFormSchema),
     defaultValues: {
       user_id: '',
       plan_id: '',
-      start_date: '',
+      start_date: format(new Date(), 'yyyy-MM-dd'),
       end_date: '',
-      status: MembershipStatus.Pending
+      status: MembershipStatus.Pending,
+      payment_method: ''
     }
   });
+  
+
+  // Form setup
+  // const form = useForm({
+  //   resolver: zodResolver(membershipFormSchema),
+  //   defaultValues: {
+  //     user_id: '',
+  //     plan_id: '',
+  //     start_date: '',
+  //     end_date: '',
+  //     status: MembershipStatus.Pending
+  //   }
+  // });
 
   // Fetch all data on component mount
   useEffect(() => {
@@ -262,37 +288,70 @@ const MembershipsPage = () => {
     }
   };
 
-  // Handle membership creation
-  const handleCreateMembership = async (data) => {
-    try {
-      const payload = {
-        user_id: parseInt(data.user_id),
-        plan_id: parseInt(data.plan_id),
-        start_date: data.start_date,
-        end_date: data.end_date,
-        status: data.status
-      };
+  // // Handle membership creation
+  // const handleCreateMembership = async (data) => {
+  //   try {
+  //     const payload = {
+  //       user_id: parseInt(data.user_id),
+  //       plan_id: parseInt(data.plan_id),
+  //       start_date: data.start_date,
+  //       end_date: data.end_date,
+  //       status: data.status
+  //     };
 
-      const response = await userInstance.post('/admin/memberships', payload);
+  //     const response = await userInstance.post('/admin/memberships', payload);
       
-      toast({
-        title: "Success",
-        description: "Membership created successfully!",
-        variant: "default",
-      });
+  //     toast({
+  //       title: "Success",
+  //       description: "Membership created successfully!",
+  //       variant: "default",
+  //     });
       
-      fetchMemberships();
-      setShowCreateDialog(false);
-      form.reset();
-    } catch (err) {
-      console.error('Error creating membership:', err);
-      toast({
-        title: "Error",
-        description: err.response?.data?.message || "Failed to create membership.",
-        variant: "destructive",
-      });
-    }
-  };
+  //     fetchMemberships();
+  //     setShowCreateDialog(false);
+  //     form.reset();
+  //   } catch (err) {
+  //     console.error('Error creating membership:', err);
+  //     toast({
+  //       title: "Error",
+  //       description: err.response?.data?.message || "Failed to create membership.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
+
+  // Finally, update your handleCreateMembership function to include the payment_method:
+const handleCreateMembership = async (data) => {
+  try {
+    const payload = {
+      user_id: parseInt(data.user_id),
+      plan_id: parseInt(data.plan_id),
+      start_date: data.start_date,
+      end_date: data.end_date,
+      status: data.status,
+      payment_method: data.payment_method
+    };
+
+    const response = await userInstance.post('/admin/memberships', payload);
+    
+    toast({
+      title: "Success",
+      description: "Membership created successfully!",
+      variant: "default",
+    });
+    
+    fetchMemberships();
+    setShowCreateDialog(false);
+    form.reset();
+  } catch (err) {
+    console.error('Error creating membership:', err);
+    toast({
+      title: "Error",
+      description: err.response?.data?.message || "Failed to create membership.",
+      variant: "destructive",
+    });
+  }
+};
 
   // Handle membership update
   const handleUpdateMembership = async (data) => {
@@ -962,6 +1021,33 @@ const MembershipsPage = () => {
                     </FormItem>
                   )}
                 />
+
+
+<FormField
+  control={form.control}
+  name="payment_method"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Payment Method</FormLabel>
+      <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select payment method" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          <SelectItem value="Cash">Cash</SelectItem>
+          <SelectItem value="Khalti">Khalti</SelectItem>
+          <SelectItem value="Online">Online</SelectItem>
+        </SelectContent>
+      </Select>
+      <FormDescription>
+        Select how the payment was or will be made
+      </FormDescription>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
